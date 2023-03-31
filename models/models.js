@@ -141,4 +141,4 @@ module.exports = {
   Order,
   City,
   Status
-};
+};  
