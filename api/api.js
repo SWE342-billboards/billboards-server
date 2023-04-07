@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { User, Billboard, Order, City, Status } = require('../models/models');
+// const { User, Billboard, Order, City, Status } = require('../models/models');
 
 // Register route
 router.post('/register', async (req, res) => {
   const { email, password, type } = req.body;
   try {
-    const user = await User.create({ email, password, type });
-    res.status(201).json(user);
+
+    // const user = await User.create({ email, password, type });
+    // res.status(201).json(user);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -17,12 +18,12 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ where: { email } });
-    if (user && user.password === password) {
-      res.status(200).json(user);
-    } else {  
-      res.status(401).json({ error: 'Invalid credentials' });
-    }
+    // const user = await User.findOne({ where: { email } });
+    // if (user && user.password === password) {
+    //   res.status(200).json(user);
+    // } else {  
+    //   res.status(401).json({ error: 'Invalid credentials' });
+    // }
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -32,12 +33,12 @@ router.post('/login', async (req, res) => {
 router.get('/billboard/:id', async (req, res) => {
   const id = req.params.id;
   try {
-    const billboard = await Billboard.findByPk(id);
-    if (billboard) {
-      res.status(200).json(billboard);
-    } else {
-      res.status(404).json({ error: 'Billboard not found' });
-    }
+    // const billboard = await Billboard.findByPk(id);
+    // if (billboard) {
+    //   res.status(200).json(billboard);
+    // } else {
+    //   res.status(404).json({ error: 'Billboard not found' });
+    // }
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -47,8 +48,8 @@ router.get('/billboard/:id', async (req, res) => {
 router.post('/order', async (req, res) => {
   const { billboardId, startDate, endDate, statusId, userId, cityId } = req.body;
   try {
-    const order = await Order.create({ billboardId, startDate, endDate, statusId, userId, cityId });
-    res.status(201).json(order);
+    // const order = await Order.create({ billboardId, startDate, endDate, statusId, userId, cityId });
+    // res.status(201).json(order);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -56,10 +57,11 @@ router.post('/order', async (req, res) => {
 
 // Get orders by current user route
 router.get('/orders', async (req, res) => {
-  const userId = req.currentUser.id;
+  // const userId = req.currentUser.id;
   try {
-    const orders = await Order.findAll({ where: { userId } });
-    res.status(200).json(orders);
+    // const orders = await Order.findAll({ where: { userId } });
+    // res.status(200).json(orders);
+    res.status(200).json('hello');
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
