@@ -57,13 +57,34 @@ router.post('/order', async (req, res) => {
   }
 });
 
+// Define the list of orders
+const orders = [
+  {
+    size: 'Small',
+    type: '1-side',
+    location: 'Almaty',
+    startDate: '2023-04-12T00:00:00.000',
+    endDate: '2023-04-13T00:00:00.000',
+    minCost: '20.0',
+    maxCost: '30.0'
+  },
+  {
+    size: 'Medium',
+    type: '2-side',
+    location: 'Astana',
+    startDate: '2023-04-13T00:00:00.000',
+    endDate: '2023-04-14T00:00:00.000',
+    minCost: '30.0',
+    maxCost: '40.0'
+  }
+];
+
 // Get orders by current user route
 router.get('/orders', async (req, res) => {
   // const userId = req.currentUser.id;
   try {
     // const orders = await Order.findAll({ where: { userId } });
-    // res.status(200).json(orders);
-    res.status(200).json('hello');
+    res.json(orders);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
