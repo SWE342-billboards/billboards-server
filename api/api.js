@@ -50,6 +50,8 @@ router.post('/order', async (req, res) => {
   try {
     // const order = await Order.create({ billboardId, startDate, endDate, statusId, userId, cityId });
     // res.status(201).json(order);
+    res.status(200).json('created');
+    console.log(req.body);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
