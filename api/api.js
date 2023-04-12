@@ -59,23 +59,25 @@ router.post('/order', async (req, res) => {
 
 // Define the list of orders
 const orders = [
-  {
+  { 
+    orderId: '001',
     size: 'Small',
     type: '1-side',
     location: 'Almaty',
     startDate: '2023-04-12T00:00:00.000',
     endDate: '2023-04-13T00:00:00.000',
-    minCost: '20.0',
-    maxCost: '30.0'
+    cost: '200.0',
+    status:'success'
   },
   {
+    orderId: '002',
     size: 'Medium',
     type: '2-side',
     location: 'Astana',
     startDate: '2023-04-13T00:00:00.000',
     endDate: '2023-04-14T00:00:00.000',
-    minCost: '30.0',
-    maxCost: '40.0'
+    cost: '400.0',
+    status:'pending'
   }
 ];
 
