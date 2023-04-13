@@ -57,20 +57,52 @@ router.get('/users', (req, res) => {
   });
 });
 
+router.post('/city', (req, res) => {
+  const city = req.body;
+  City.create(city, (err, cityId) => {
+    if (err) return res.status(500).json({ error: 'Failed to create city.' });
+    res.json({ id: cityId });
+  });
+});
+
+router.post('/status', (req, res) => {
+  const status = req.body;
+  Status.create(status, (err, statusId) => {
+    if (err) return res.status(500).json({ error: 'Failed to create status.' });
+    res.json({ id: statusId });
+  });
+});
+
+// Create an order
+router.post('/order', (req, res) => {
+  const order = req.body;
+  Order.create(order, (err, orderId) => {
+    if (err) return res.status(500).json({ error: 'Failed to create order.' });
+    res.json({ id: orderId });
+  });
+});
+
+// Get all orders
+router.get('/orders', (req, res) => {
+  Order.getAll((err, orders) => {
+    if (err) return res.status(500).json({ error: 'Failed to get orders.' });
+    res.json(orders);
+  });
+});
 // -------------------------------
 
 // Create order route
-router.post('/order', async (req, res) => {
-  const { billboardId, startDate, endDate, statusId, userId, cityId } = req.body;
-  try {
-    // const order = await Order.create({ billboardId, startDate, endDate, statusId, userId, cityId });
-    // res.status(201).json(order);
-    res.status(200).json('created');
-    console.log(req.body);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
+// router.post('/order', async (req, res) => {
+//   const { billboardId, startDate, endDate, statusId, userId, cityId } = req.body;
+//   try {
+//     // const order = await Order.create({ billboardId, startDate, endDate, statusId, userId, cityId });
+//     // res.status(201).json(order);
+//     res.status(200).json('created');
+//     console.log(req.body);
+//   } catch (error) {
+//     res.status(400).json({ error: error.message });
+//   }
+// });
 
 // Define the list of orders
 const orders = [
@@ -97,14 +129,14 @@ const orders = [
 ];
 
 // Get orders by current user route
-router.get('/orders', async (req, res) => {
-  // const userId = req.currentUser.id;
-  try {
-    // const orders = await Order.findAll({ where: { userId } });
-    res.json(orders);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
+// router.get('/orders', async (req, res) => {
+//   // const userId = req.currentUser.id;
+//   try {
+//     // const orders = await Order.findAll({ where: { userId } });
+//     res.json(orders);
+//   } catch (error) {
+//     res.status(400).json({ error: error.message });
+//   }
+// });
 
 module.exports = router;

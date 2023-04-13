@@ -6,9 +6,7 @@ const connection = mysql.createConnection({
   database: 'billboards',
 });
 
-// Define the Billboard model
 const Billboard = {
-  // Add a new billboard to the database
   create: (billboard, callback) => {
     const sql = 'INSERT INTO Billboards SET ?';
     connection.query(sql, billboard, (error, results, fields) => {
@@ -21,7 +19,6 @@ const Billboard = {
     });
   },
 
-  // Retrieve all billboards from the database
   findAll: (callback) => {
     const sql = 'SELECT * FROM Billboards';
     connection.query(sql, (error, results, fields) => {
@@ -69,11 +66,54 @@ const User = {
   },
 };
 
-// module.exports = Billboard;
+const City = {
+  create: (city, callback) => {
+    const sql = 'INSERT INTO Cities (name) VALUES (?)';
+    const values = [city.name];
+
+    connection.query(sql, values, (err, result) => {
+      if (err) return callback(err);
+      callback(null, result.insertId);
+    });
+  }
+};
+
+const Status = {
+  create: (status, callback) => {
+    const sql = 'INSERT INTO Status (prerequisite_status_id, name) VALUES (?, ?)';
+    const values = [status.prerequisite_status_id, status.name];
+
+    connection.query(sql, values, (err, result) => {
+      if (err) return callback(err);
+      callback(null, result.insertId);
+    });
+  },
+}
+
+const Order = {
+  create: (order, callback) => {
+    const sql = 'INSERT INTO Orders (billboard_id, start_date, end_date, status_id, user_id, city_id) VALUES (?, ?, ?, ?, ?, ?)';
+    const values = [order.billboard_id, order.start_date, order.end_date, order.status_id, order.user_id, order.city_id];
+
+    connection.query(sql, values, (err, result) => {
+      if (err) return callback(err);
+      callback(null, result.insertId);
+    });
+  },
+
+  getAll: (callback) => {
+    const sql = 'SELECT * FROM Orders';
+    connection.query(sql, (err, results) => {
+      if (err) return callback(err);
+      callback(null, results);
+    });
+  }
+};
+
 module.exports = {
   User,
   Billboard,
-  // Order,
-  // City,
-  // Status
+  City,
+  Status,
+  Order,
 };  
