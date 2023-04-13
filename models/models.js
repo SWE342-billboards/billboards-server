@@ -1,145 +1,113 @@
-const Sequelize = require('sequelize');
-const sequelize = new Sequelize('database', 'username', 'password', {
-  host: '127.0.0.1',
-  port: 8008,
-  dialect: 'mysql'
+const mysql = require('mysql');
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'password',
+  database: 'billboards',
 });
 
-const User = sequelize.define('user', {
-  id: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
+// Define the Billboard model
+const Billboard = {
+  // Add a new billboard to the database
+  create: (billboard, callback) => {
+    const sql = 'INSERT INTO Billboards SET ?';
+    connection.query(sql, billboard, (error, results, fields) => {
+      if (error) {
+        console.error('Error adding billboard to database:', error);
+        callback(error, null);
+      } else {
+        callback(null, results.insertId);
+      }
+    });
   },
-  email: {
-    type: Sequelize.STRING,
-    allowNull: false,
-    unique: true
+
+  // Retrieve all billboards from the database
+  findAll: (callback) => {
+    const sql = 'SELECT * FROM Billboards';
+    connection.query(sql, (error, results, fields) => {
+      if (error) {
+        console.error('Error retrieving billboards from database:', error);
+        callback(error, null);
+      } else {
+        callback(null, results);
+      }
+    });
   },
-  password: {
-    type: Sequelize.STRING,
-    allowNull: false
+
+  // Retrieve a specific billboard from the database by id
+  findById: (id, callback) => {
+    const sql = 'SELECT * FROM Billboards WHERE id = ?';
+    connection.query(sql, [id], (error, results, fields) => {
+      if (error) {
+        console.error('Error retrieving billboard from database:', error);
+        callback(error, null);
+      } else if (results.length === 0) {
+        callback(new Error(`Billboard with id ${id} not found`), null);
+      } else {
+        callback(null, results[0]);
+      }
+    });
   },
-  type: {
-    type: Sequelize.ENUM('customer', 'manager'),
-    allowNull: false,
-    defaultValue: 'customer'
+
+  // Update a specific billboard in the database by id
+  update: (id, updates, callback) => {
+    const sql = 'UPDATE Billboards SET ? WHERE id = ?';
+    connection.query(sql, [updates, id], (error, results, fields) => {
+      if (error) {
+        console.error('Error updating billboard in database:', error);
+        callback(error, null);
+      } else if (results.affectedRows === 0) {
+        callback(new Error(`Billboard with id ${id} not found`), null);
+      } else {
+        callback(null, results.changedRows);
+      }
+    });
+  },
+
+  // Delete a specific billboard from the database by id
+  delete: (id, callback) => {
+    const sql = 'DELETE FROM Billboards WHERE id = ?';
+    connection.query(sql, [id], (error, results, fields) => {
+      if (error) {
+        console.error('Error deleting billboard from database:', error);
+        callback(error, null);
+      } else if (results.affectedRows === 0) {
+        callback(new Error(`Billboard with id ${id} not found`), null);
+      } else {
+        callback(null, results.affectedRows);
+      }
+    });
+  },
+};
+
+// Define the User model
+const User = {
+  create: (user, callback) => {
+    const sql = 'INSERT INTO users (email, password, type) VALUES (?, ?, ?)';
+    const values = [user.email, user.password, user.type];
+
+    connection.query(sql, values, (err, result) => {
+      if (err) return callback(err);
+      callback(null, result.insertId);
+    });
+  },
+
+  getById: (id, callback) => {
+    const sql = 'SELECT * FROM users WHERE id = ?';
+    connection.query(sql, [id], (err, results) => {
+      if (err) return callback(err);
+      if (results.length === 0) return callback(null, null);
+      const user = results[0];
+      callback(null, user);
+    });
   }
-});
+};
 
-const Billboard = sequelize.define('billboard', {
-  id: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  costPerDay: {
-    type: Sequelize.INTEGER,
-    allowNull: false
-  },
-  type: {
-    type: Sequelize.ENUM('1-sided', '2-sided', '3-sided'),
-    allowNull: false
-  },
-  material: {
-    type: Sequelize.ENUM('digital', 'painted'),
-    allowNull: false
-  }
-});
-
-const Status = sequelize.define('status', {
-  id: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  prerequisite_status_id: {
-    type: Sequelize.INTEGER,
-    allowNull: true,
-    references: {
-      model: 'status',
-      key: 'id'
-    }
-  },
-  name: {
-    type: Sequelize.ENUM('pending', 'wait for payment', 'approved', 'canceled'),
-    allowNull: false
-  }
-});
-
-const City = sequelize.define('city', {
-  id: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  name: {
-    type: Sequelize.STRING,
-    allowNull: false,
-    unique: true
-  }
-});
-
-const Order = sequelize.define('order', {
-  id: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  billboard_id: {
-    type: Sequelize.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'billboard',
-      key: 'id'
-    }
-  },
-  start_date: {
-    type: Sequelize.DATEONLY,
-    allowNull: false
-  },
-  end_date: {
-    type: Sequelize.DATEONLY,
-    allowNull: false
-  },
-  status_id: {
-    type: Sequelize.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'status',
-      key: 'id'
-    }
-  },
-  user_id: {
-    type: Sequelize.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'user',
-      key: 'id'
-    }
-  },
-  city_id: {
-    type: Sequelize.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'city',
-      key: 'id'
-    }
-  }
-});
-
-sequelize.sync()
-  .then(() => {
-    console.log('Users, billboards, statuses, cities, and orders tables created');
-  })
-  .catch((error) => {
-    console.error('Error creating users, billboards, statuses, cities, and orders tables:', error);
-  });
-
+// module.exports = Billboard;
 module.exports = {
   User,
   Billboard,
-  Order,
-  City,
-  Status
+  // Order,
+  // City,
+  // Status
 };  

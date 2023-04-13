@@ -1,17 +1,54 @@
 const express = require('express');
 const router = express.Router();
-// const { User, Billboard, Order, City, Status } = require('../models/models');
+const { User, Billboard, Order, City, Status } = require('../models/models');
 
-// Register route
-router.post('/register', async (req, res) => {
-  const { email, password, type } = req.body;
-  try {
+// Get all billboards
+router.get('/billboards', (req, res) => {
+  Billboard.findAll((err, billboards) => {
+    if (err) {
+      console.error('Error retrieving billboards:', err);
+      res.status(500).send('Error retrieving billboards');
+    } else {
+      res.send(billboards);
+    }
+  });
+});
 
-    // const user = await User.create({ email, password, type });
-    // res.status(201).json(user);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
+// Get a specific billboard by ID
+router.get('/billboards/:id', (req, res) => {
+  const id = req.params.id;
+  Billboard.findById(id, (err, billboard) => {
+    if (err) {
+      console.error(`Error retrieving billboard with id ${id}:`, err);
+      res.status(500).send(`Error retrieving billboard with id ${id}`);
+    } else {
+      res.send(billboard);
+    }
+  });
+});
+
+// Create a new billboard
+router.post('/billboards', (req, res) => {
+  const newBillboard = req.body;
+  Billboard.create(newBillboard, (err, billboardId) => {
+    if (err) {
+      console.error('Error creating billboard:', err);
+      res.status(500).send('Error creating billboard');
+    } else {
+      res.status(201).send({ id: billboardId });
+    }
+  });
+});
+
+router.post('/register_user', (req, res) => {
+  const user = req.body;
+  User.create(user, (err, userId) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Failed to create user' });
+    }
+    res.json({ id: userId });
+  });
 });
 
 // Login route
@@ -23,21 +60,6 @@ router.post('/login', async (req, res) => {
     //   res.status(200).json(user);
     // } else {  
     //   res.status(401).json({ error: 'Invalid credentials' });
-    // }
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// Get billboard by ID route
-router.get('/billboard/:id', async (req, res) => {
-  const id = req.params.id;
-  try {
-    // const billboard = await Billboard.findByPk(id);
-    // if (billboard) {
-    //   res.status(200).json(billboard);
-    // } else {
-    //   res.status(404).json({ error: 'Billboard not found' });
     // }
   } catch (error) {
     res.status(400).json({ error: error.message });
