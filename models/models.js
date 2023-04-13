@@ -80,10 +80,9 @@ const Billboard = {
   },
 };
 
-// Define the User model
 const User = {
   create: (user, callback) => {
-    const sql = 'INSERT INTO users (email, password, type) VALUES (?, ?, ?)';
+    const sql = 'INSERT INTO Users (email, password, type) VALUES (?, ?, ?)';
     const values = [user.email, user.password, user.type];
 
     connection.query(sql, values, (err, result) => {
@@ -93,14 +92,36 @@ const User = {
   },
 
   getById: (id, callback) => {
-    const sql = 'SELECT * FROM users WHERE id = ?';
+    const sql = 'SELECT * FROM Users WHERE id = ?';
     connection.query(sql, [id], (err, results) => {
       if (err) return callback(err);
       if (results.length === 0) return callback(null, null);
       const user = results[0];
       callback(null, user);
     });
-  }
+  },
+
+  getByEmailAndPassword: (email, password, callback) => {
+    const sql = 'SELECT * FROM Users WHERE email = ? AND password = ?';
+    connection.query(sql, [email, password], (err, results) => {
+      if (err) return callback(err);
+      if (results.length === 0) return callback(null, null);
+      const user = results[0];
+      callback(null, user);
+    });
+  },
+
+  getAll: (callback) => {
+    const sql = 'SELECT * FROM Users';
+    connection.query(sql, (error, results, fields) => {
+      if (error) {
+        console.error('Error retrieving billboards from database:', error);
+        callback(error, null);
+      } else {
+        callback(null, results);
+      }
+    });
+  },
 };
 
 // module.exports = Billboard;

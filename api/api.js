@@ -14,21 +14,8 @@ router.get('/billboards', (req, res) => {
   });
 });
 
-// Get a specific billboard by ID
-router.get('/billboards/:id', (req, res) => {
-  const id = req.params.id;
-  Billboard.findById(id, (err, billboard) => {
-    if (err) {
-      console.error(`Error retrieving billboard with id ${id}:`, err);
-      res.status(500).send(`Error retrieving billboard with id ${id}`);
-    } else {
-      res.send(billboard);
-    }
-  });
-});
-
 // Create a new billboard
-router.post('/billboards', (req, res) => {
+router.post('/billboard', (req, res) => {
   const newBillboard = req.body;
   Billboard.create(newBillboard, (err, billboardId) => {
     if (err) {
@@ -40,31 +27,37 @@ router.post('/billboards', (req, res) => {
   });
 });
 
-router.post('/register_user', (req, res) => {
+// curl -X POST -H "Content-Type: application/json" -d '{"email":"example@example.com","password":"password","type":"customer"}' http://localhost:3005/api/register
+router.post('/register', (req, res) => {
+  console.log(req.body);
+
   const user = req.body;
   User.create(user, (err, userId) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: 'Failed to create user' });
-    }
+    if (err) return res.status(500).json({ error: 'Failed to create user.' });
     res.json({ id: userId });
   });
 });
 
-// Login route
-router.post('/login', async (req, res) => {
+// Handle POST requests to /login
+router.post('/login', (req, res) => {
   const { email, password } = req.body;
-  try {
-    // const user = await User.findOne({ where: { email } });
-    // if (user && user.password === password) {
-    //   res.status(200).json(user);
-    // } else {  
-    //   res.status(401).json({ error: 'Invalid credentials' });
-    // }
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
+  console.log(req.body);
+  User.getByEmailAndPassword(email, password, (err, user) => {
+    if (err) return res.status(500).json({ error: 'Failed to authenticate user.' });
+    if (!user) return res.status(401).json({ error: 'Invalid email or password.' });
+    res.json(user);
+  });
 });
+
+// Handle GET requests to /users
+router.get('/users', (req, res) => {
+  User.getAll((err, users) => {
+    if (err) return res.status(500).json({ error: 'Failed to retrieve users.' });
+    res.json(users);
+  });
+});
+
+// -------------------------------
 
 // Create order route
 router.post('/order', async (req, res) => {
