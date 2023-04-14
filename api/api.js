@@ -22,13 +22,6 @@ router.post('/login', (req, res) => {
   });
 });
 
-router.get('/users', (req, res) => {
-  User.getAll((err, users) => {
-    if (err) return res.status(500).json({ error: 'Failed to retrieve users.' });
-    res.json(users);
-  });
-});
-
 router.post('/make_order', (req, res) => {
   const order = req.body;
   
