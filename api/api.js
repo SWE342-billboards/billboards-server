@@ -2,32 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { User, Billboard, Order, City, Status } = require('../models/models');
 
-// Get all billboards
-router.get('/billboards', (req, res) => {
-  Billboard.findAll((err, billboards) => {
-    if (err) {
-      console.error('Error retrieving billboards:', err);
-      res.status(500).send('Error retrieving billboards');
-    } else {
-      res.send(billboards);
-    }
-  });
-});
-
-// Create a new billboard
-router.post('/billboard', (req, res) => {
-  const newBillboard = req.body;
-  Billboard.create(newBillboard, (err, billboardId) => {
-    if (err) {
-      console.error('Error creating billboard:', err);
-      res.status(500).send('Error creating billboard');
-    } else {
-      res.status(201).send({ id: billboardId });
-    }
-  });
-});
-
-// curl -X POST -H "Content-Type: application/json" -d '{"email":"example@example.com","password":"password","type":"customer"}' http://localhost:3005/api/register
 router.post('/register', (req, res) => {
   console.log(req.body);
 
@@ -38,7 +12,6 @@ router.post('/register', (req, res) => {
   });
 });
 
-// Handle POST requests to /login
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
   console.log(req.body);
@@ -49,7 +22,6 @@ router.post('/login', (req, res) => {
   });
 });
 
-// Handle GET requests to /users
 router.get('/users', (req, res) => {
   User.getAll((err, users) => {
     if (err) return res.status(500).json({ error: 'Failed to retrieve users.' });
@@ -57,28 +29,34 @@ router.get('/users', (req, res) => {
   });
 });
 
-router.post('/city', (req, res) => {
-  const city = req.body;
-  City.create(city, (err, cityId) => {
-    if (err) return res.status(500).json({ error: 'Failed to create city.' });
-    res.json({ id: cityId });
-  });
-});
-
-router.post('/status', (req, res) => {
-  const status = req.body;
-  Status.create(status, (err, statusId) => {
-    if (err) return res.status(500).json({ error: 'Failed to create status.' });
-    res.json({ id: statusId });
-  });
-});
-
-// Create an order
-router.post('/order', (req, res) => {
+router.post('/make_order', (req, res) => {
   const order = req.body;
-  Order.create(order, (err, orderId) => {
-    if (err) return res.status(500).json({ error: 'Failed to create order.' });
-    res.json({ id: orderId });
+  
+  // Get the city ID from the city name in the request body
+  const cityName = order.location;
+  City.getIdByName(cityName, (err, cityId) => {
+    if (err) return res.status(500).json({ error: 'Failed to get/create city.' });
+
+    // Update the order object with the city ID
+    order.city_id = cityId;
+
+    console.log(order);
+    
+    // Get the billboard based on the order parameters
+    const { type, material, size, min_cost, max_cost } = order;
+    Billboard.getBillboardByParams(type, material, size, min_cost, max_cost, (err, billboard) => {
+      if (err) return res.status(500).json({ error: 'Failed to get/create billboard.' });
+
+      // Update the order object with the billboard ID and cost per day
+      order.billboard_id = billboard.id;
+      order.cost = billboard.costPerDay;
+
+      // Create the order with the updated city and billboard IDs
+      Order.create(order, (err, orderId) => {
+        if (err) return res.status(500).json({ error: 'Failed to create order.' });
+        res.json({ id: orderId });
+      });
+    });
   });
 });
 
@@ -89,54 +67,5 @@ router.get('/orders', (req, res) => {
     res.json(orders);
   });
 });
-// -------------------------------
-
-// Create order route
-// router.post('/order', async (req, res) => {
-//   const { billboardId, startDate, endDate, statusId, userId, cityId } = req.body;
-//   try {
-//     // const order = await Order.create({ billboardId, startDate, endDate, statusId, userId, cityId });
-//     // res.status(201).json(order);
-//     res.status(200).json('created');
-//     console.log(req.body);
-//   } catch (error) {
-//     res.status(400).json({ error: error.message });
-//   }
-// });
-
-// Define the list of orders
-const orders = [
-  { 
-    orderId: '001',
-    size: 'Small',
-    type: '1-side',
-    location: 'Almaty',
-    startDate: '2023-04-12T00:00:00.000',
-    endDate: '2023-04-13T00:00:00.000',
-    cost: '200.0',
-    status:'success'
-  },
-  {
-    orderId: '002',
-    size: 'Medium',
-    type: '2-side',
-    location: 'Astana',
-    startDate: '2023-04-13T00:00:00.000',
-    endDate: '2023-04-14T00:00:00.000',
-    cost: '400.0',
-    status:'pending'
-  }
-];
-
-// Get orders by current user route
-// router.get('/orders', async (req, res) => {
-//   // const userId = req.currentUser.id;
-//   try {
-//     // const orders = await Order.findAll({ where: { userId } });
-//     res.json(orders);
-//   } catch (error) {
-//     res.status(400).json({ error: error.message });
-//   }
-// });
 
 module.exports = router;

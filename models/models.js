@@ -30,6 +30,23 @@ const Billboard = {
       }
     });
   },
+
+getBillboardByParams: (type, material, size, min_cost, max_cost, callback) => {
+    const sql = 'SELECT * FROM Billboards WHERE type = ? AND material = ? AND size = ? AND costPerDay >= ? AND costPerDay <= ?';
+    const values = [type, material, size, min_cost, max_cost];
+
+    connection.query(sql, values, (error, results, fields) => {
+      if (error) {
+        console.error('Error finding billboard in database:', error);
+        callback(error, null);
+      } else if (results.length > 0) {
+        callback(null, results[0]);
+      } else {
+        const newBillboard = { type, material, size, costPerDay: 120 };
+        Billboard.create(newBillboard, callback);
+      }
+    });
+  }
 };
 
 const User = {
@@ -67,6 +84,25 @@ const User = {
 };
 
 const City = {
+  getIdByName: (name, callback) => {
+    const sql = 'SELECT id FROM Cities WHERE name = ?';
+    const values = [name];
+
+    connection.query(sql, values, (err, results) => {
+      if (err) return callback(err);
+      if (results.length === 0) {
+        // If the city does not exist in the database, create a new one
+        City.create({ name: name }, (err, cityId) => {
+          if (err) return callback(err);
+          callback(null, cityId);
+        });
+      } else {
+        // If the city exists, return its ID
+        callback(null, results[0].id);
+      }
+    });
+  },
+
   create: (city, callback) => {
     const sql = 'INSERT INTO Cities (name) VALUES (?)';
     const values = [city.name];
@@ -74,6 +110,15 @@ const City = {
     connection.query(sql, values, (err, result) => {
       if (err) return callback(err);
       callback(null, result.insertId);
+    });
+  },
+
+  getAll: (callback) => {
+    const sql = 'SELECT * FROM Cities';
+
+    connection.query(sql, (err, results) => {
+      if (err) return callback(err);
+      callback(null, results);
     });
   }
 };
@@ -92,9 +137,12 @@ const Status = {
 
 const Order = {
   create: (order, callback) => {
-    const sql = 'INSERT INTO Orders (billboard_id, start_date, end_date, status_id, user_id, city_id) VALUES (?, ?, ?, ?, ?, ?)';
-    const values = [order.billboard_id, order.start_date, order.end_date, order.status_id, order.user_id, order.city_id];
-
+    const sql = 'INSERT INTO Orders (billboard_id, start_date, end_date, status_id, user_id, city_id, cost) VALUES (?, ?, ?, ?, ?, ?, ?)';
+      
+    // Set the status_id to 'pending'
+    const status_id = 1;
+    const values = [order.billboard_id, order.start_date, order.end_date, status_id, order.user_id, order.city_id, order.cost];
+    
     connection.query(sql, values, (err, result) => {
       if (err) return callback(err);
       callback(null, result.insertId);
