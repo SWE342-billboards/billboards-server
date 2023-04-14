@@ -60,11 +60,24 @@ router.post('/make_order', (req, res) => {
   });
 });
 
-// Get all orders
 router.get('/orders', (req, res) => {
-  Order.getAll((err, orders) => {
+  const user_id = req.body.user_id;
+  Order.getAllByUser(user_id, (err, orders) => {
     if (err) return res.status(500).json({ error: 'Failed to get orders.' });
-    res.json(orders);
+    const formattedOrders = orders.map(order => {
+      return {
+        order_id: order.order_id,
+        start_date: order.start_date,
+        end_date: order.end_date,
+        status: order.status,
+        city: order.city,
+        cost: order.cost,
+        type: order.type,
+        material: order.material,
+        size: order.size
+      };
+    });
+    res.json(formattedOrders);
   });
 });
 

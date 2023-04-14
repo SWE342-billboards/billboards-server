@@ -19,19 +19,7 @@ const Billboard = {
     });
   },
 
-  findAll: (callback) => {
-    const sql = 'SELECT * FROM Billboards';
-    connection.query(sql, (error, results, fields) => {
-      if (error) {
-        console.error('Error retrieving billboards from database:', error);
-        callback(error, null);
-      } else {
-        callback(null, results);
-      }
-    });
-  },
-
-getBillboardByParams: (type, material, size, min_cost, max_cost, callback) => {
+  getBillboardByParams: (type, material, size, min_cost, max_cost, callback) => {
     const sql = 'SELECT * FROM Billboards WHERE type = ? AND material = ? AND size = ? AND costPerDay >= ? AND costPerDay <= ?';
     const values = [type, material, size, min_cost, max_cost];
 
@@ -67,18 +55,6 @@ const User = {
       if (results.length === 0) return callback(null, null);
       const user = results[0];
       callback(null, user);
-    });
-  },
-
-  getAll: (callback) => {
-    const sql = 'SELECT * FROM Users';
-    connection.query(sql, (error, results, fields) => {
-      if (error) {
-        console.error('Error retrieving billboards from database:', error);
-        callback(error, null);
-      } else {
-        callback(null, results);
-      }
     });
   },
 };
@@ -123,18 +99,6 @@ const City = {
   }
 };
 
-const Status = {
-  create: (status, callback) => {
-    const sql = 'INSERT INTO Status (prerequisite_status_id, name) VALUES (?, ?)';
-    const values = [status.prerequisite_status_id, status.name];
-
-    connection.query(sql, values, (err, result) => {
-      if (err) return callback(err);
-      callback(null, result.insertId);
-    });
-  },
-}
-
 const Order = {
   create: (order, callback) => {
     const sql = 'INSERT INTO Orders (billboard_id, start_date, end_date, status_id, user_id, city_id, cost) VALUES (?, ?, ?, ?, ?, ?, ?)';
@@ -155,6 +119,21 @@ const Order = {
       if (err) return callback(err);
       callback(null, results);
     });
+  },
+
+  getAllByUser: (user_id, callback) => {
+    const sql = `SELECT Orders.id as order_id, Orders.start_date, Orders.end_date, 
+                  Status.name as status, Cities.name as city, Billboards.costPerDay as cost,
+                  Billboards.type, Billboards.material, Billboards.size
+                  FROM Orders 
+                  INNER JOIN Billboards ON Orders.billboard_id = Billboards.id 
+                  INNER JOIN Status ON Orders.status_id = Status.id
+                  INNER JOIN Cities ON Orders.city_id = Cities.id
+                  WHERE Orders.user_id = ?`;
+    connection.query(sql, user_id, (err, results) => {
+      if (err) return callback(err);
+      callback(null, results);
+    });
   }
 };
 
@@ -162,6 +141,5 @@ module.exports = {
   User,
   Billboard,
   City,
-  Status,
   Order,
 };  
