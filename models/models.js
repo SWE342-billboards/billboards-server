@@ -30,7 +30,7 @@ const Billboard = {
       } else if (results.length > 0) {
         callback(null, results[0]);
       } else {
-        const newBillboard = { type, material, size, costPerDay: 120 };
+        const newBillboard = { type, material, size, costPerDay: max_cost };
         Billboard.create(newBillboard, callback);
       }
     });
