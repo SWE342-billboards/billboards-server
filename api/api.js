@@ -3,12 +3,11 @@ const router = express.Router();
 const { User, Billboard, Order, City, Status } = require('../models/models');
 
 router.post('/register', (req, res) => {
-  console.log(req.body);
-
   const user = req.body;
   User.create(user, (err, userId) => {
     if (err) return res.status(500).json({ error: 'Failed to create user.' });
     res.json({ id: userId });
+    console.log({ id: userId });
   });
 });
 
@@ -18,7 +17,8 @@ router.post('/login', (req, res) => {
   User.getByEmailAndPassword(email, password, (err, user) => {
     if (err) return res.status(500).json({ error: 'Failed to authenticate user.' });
     if (!user) return res.status(401).json({ error: 'Invalid email or password.' });
-    res.json(user);
+    res.json({id: user.id, type: user.type});
+    console.log({id: user.id, type: user.type});
   });
 });
 
@@ -60,7 +60,7 @@ router.post('/make_order', (req, res) => {
   });
 });
 
-router.get('/orders', (req, res) => {
+router.post('/orders', (req, res) => {
   const user_id = req.body.user_id;
   Order.getAllByUser(user_id, (err, orders) => {
     if (err) return res.status(500).json({ error: 'Failed to get orders.' });
@@ -78,6 +78,7 @@ router.get('/orders', (req, res) => {
       };
     });
     res.json(formattedOrders);
+    console.log(formattedOrders);
   });
 });
 
